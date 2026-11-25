@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102a43">
+  <title>درس‌نامه</title>
+  <link rel="stylesheet" href="../assets/guide.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <a class="back" href="../index.html">همهٔ علوم</a> <a class="back" href="../valed.html">برای بزرگ‌ترها</a>
+      <h1 id="pageTitle">درس‌نامه</h1>
+      <p id="pageDesc"></p>
+      <span class="badge" id="badge">در حال آماده‌سازی درس‌ها…</span>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="panel" id="howPanel"></section>
+    <div id="stages" class="stages" aria-label="فیلتر مرحلهٔ یادگیری"></div>
+    <p class="progress-fun" id="progressFun">ستاره‌ها: ۰</p>
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="چی می‌خوای پیدا کنی؟" aria-label="جست‌وجوی درس">
+      <button id="easyMode" type="button">ساده‌تر نشان بده</button>
+      <button id="allAnswers" type="button">همهٔ پاسخ‌ها</button>
+    </div>
+    <div class="reader">
+      <nav id="toc" class="toc" aria-label="فهرست درس‌ها"></nav>
+      <div>
+        <p id="lessonPos" class="lesson-pos"></p>
+        <section id="lessons" aria-live="polite"><div class="loading">در حال خواندن درس‌ها…</div></section>
+      </div>
+    </div>
+    <section class="endnote"><h2>ترتیب یادگیری</h2><p id="orderNote"></p></section>
+    <details class="fold" id="glossaryFold"><summary>واژه‌نامه</summary><div class="glossary-list" id="glossary"></div></details>
+    <details class="fold" id="formulaFold"><summary>برگهٔ فرمول‌ها</summary><div id="formulaSheet"></div></details>
+    <p class="footer" id="footer"></p>
+  </main>
+  <script src="guide.js"></script>
+  <script src="extra.js"></script>
+  <script src="../assets/figures.js"></script>
+  <script src="../assets/shared-adds.js"></script>
+  <script src="../assets/adds.js"></script>
+  <script src="../assets/fun.js"></script>
+  <script src="../assets/labs.js"></script>
+  <script src="../assets/guide.js"></script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102a43">
+  <title>خانواده | همراه علوم</title>
+  <link rel="stylesheet" href="assets/guide.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <a class="back" href="vorod.html">ورود</a>
+      <h1>خانواده و تنظیمات</h1>
+      <p>کاربر و تنظیمات در SQLite؛ محتوا در JSON.</p>
+    </div>
+  </header>
+  <main class="wrap">
+    <nav class="nav-cats" aria-label="منو">
+      <a href="vorod.html">ورود</a>
+      <a href="khanevadeh.html" aria-current="page">خانواده</a>
+      <a href="dastyar.html">دستیار</a>
+      <a href="database.html">دیتابیس JSON</a>
+    </nav>
+
+    <p class="kid-note" id="msg">در حال بارگذاری…</p>
+
+    <section class="panel parent-card" id="usersBox" hidden>
+      <h2>۱) اعضای خانواده</h2>
+      <div id="userList" class="adds-list"></div>
+
+      <h3 class="form-sub">فرزند جدید</h3>
+      <form id="childForm" class="form-stack">
+        <label>نام نمایشی
+          <input id="cName" type="text" placeholder="مثلاً آوا" autocomplete="off">
+        </label>
+        <label>نام کاربری
+          <input id="cUser" type="text" dir="ltr" autocomplete="off">
+        </label>
+        <label>رمز
+          <input id="cPass" type="password" dir="ltr" autocomplete="new-password">
+        </label>
+        <button type="submit" class="fun-btn">افزودن فرزند</button>
+      </form>
+    </section>
+
+    <section class="panel parent-card" id="settingsBox" hidden>
+      <h2>۲) تنظیمات برنامه</h2>
+      <form id="settingsForm" class="form-stack">
+        <fieldset class="form-group">
+          <legend>عمومی</legend>
+          <label>عنوان برنامه
+            <input id="appTitle" type="text">
+          </label>
+          <label>پورت پیشنهادی سرور
+            <input id="prefPort" type="number" min="1" max="65535" dir="ltr">
+          </label>
+        </fieldset>
+        <fieldset class="form-group">
+          <legend>تجربهٔ بچه</legend>
+          <label class="check-row"><input id="easyDefault" type="checkbox"> حالت ساده‌تر پیش‌فرض</label>
+          <label class="check-row"><input id="ttsEnabled" type="checkbox"> صدای کوتاه (TTS)</label>
+          <label class="check-row"><input id="allowGuest" type="checkbox"> اجازه مهمان بدون حساب</label>
+        </fieldset>
+        <button type="submit" class="fun-btn">ذخیره تنظیمات</button>
+      </form>
+      <p class="kid-note" style="margin-top:10px">
+        محتوا: <b dir="ltr">data/shared-adds.json</b><br>
+        کاربران: <b dir="ltr">data/app.sqlite</b>
+      </p>
+    </section>
+  </main>
+  <script src="assets/auth.js"></script>
+  <script>
+    const msg = document.getElementById("msg");
+
+    function fail(e) {
+      if (e && (e.status === 401 || e.message === "login_required")) {
+        location.href = "vorod.html";
+        return;
+      }
+      if (e && (e.status === 403 || e.message === "parent_only")) {
+        msg.textContent = "فقط والد می‌تواند این صفحه را ببیند.";
+        return;
+      }
+      msg.textContent = (e && e.message) || "خطا";
+    }
+
+    function renderUsers(users) {
+      document.getElementById("userList").innerHTML = (users || []).map(function (u) {
+        return "<div class=\"adds-item\"><b>" + (u.display_name || u.username) + "</b> · " +
+          AUTH.roleLabel(u.role) + " · <span dir=\"ltr\">" + u.username + "</span>" +
+          (u.active ? "" : " · غیرفعال") +
+          (u.role === "child"
+            ? " <button type=\"button\" class=\"fun-btn\" data-reset=\"" + u.id + "\">عوض کردن رمز</button>"
+            : "") +
+          "</div>";
+      }).join("") || "<p>هنوز فرزندی نیست.</p>";
+
+      Array.prototype.forEach.call(document.querySelectorAll("[data-reset]"), function (btn) {
+        btn.onclick = function () {
+          const pass = prompt("رمز جدید برای این فرزند (حداقل ۴ کاراکتر):");
+          if (!pass) return;
+          AUTH.updateUser(Number(btn.getAttribute("data-reset")), { password: pass })
+            .then(load)
+            .catch(fail);
+        };
+      });
+    }
+
+    function fillSettings(s) {
+      document.getElementById("appTitle").value = s.app_title || "";
+      document.getElementById("prefPort").value = s.preferred_port || "8080";
+      document.getElementById("easyDefault").checked = s.easy_mode_default === "1";
+      document.getElementById("ttsEnabled").checked = s.tts_enabled !== "0";
+      document.getElementById("allowGuest").checked = s.allow_guest === "1";
+    }
+
+    function load() {
+      return AUTH.status().then(function (st) {
+        if (!st.me) {
+          location.href = "vorod.html";
+          return;
+        }
+        if (st.me.role !== "parent") {
+          msg.textContent = "فقط والد.";
+          return;
+        }
+        msg.textContent = "وارد شدی به عنوان " + (st.me.display_name || st.me.username);
+        document.getElementById("usersBox").hidden = false;
+        document.getElementById("settingsBox").hidden = false;
+        fillSettings(st.settings || {});
+        return AUTH.users().then(function (r) { renderUsers(r.users); });
+      });
+    }
+
+    document.getElementById("childForm").addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      AUTH.createUser({
+        role: "child",
+        display_name: document.getElementById("cName").value,
+        username: document.getElementById("cUser").value,
+        password: document.getElementById("cPass").value
+      }).then(function () {
+        document.getElementById("childForm").reset();
+        return load();
+      }).catch(fail);
+    });
+
+    document.getElementById("settingsForm").addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      AUTH.saveSettings({
+        app_title: document.getElementById("appTitle").value,
+        preferred_port: String(document.getElementById("prefPort").value || "8080"),
+        easy_mode_default: document.getElementById("easyDefault").checked ? "1" : "0",
+        tts_enabled: document.getElementById("ttsEnabled").checked ? "1" : "0",
+        allow_guest: document.getElementById("allowGuest").checked ? "1" : "0"
+      }).then(function () {
+        msg.textContent = "تنظیمات ذخیره شد.";
+      }).catch(fail);
+    });
+
+    load().catch(fail);
+  </script>
+</body>
+</html>

@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102a43">
+  <title>دستیار بزرگ‌ترها | همراه علوم</title>
+  <link rel="stylesheet" href="assets/guide.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <a class="back" href="valed.html">برای بزرگ‌ترها</a>
+      <a class="back" href="index.html">صفحهٔ اصلی</a>
+      <h1>دستیار هوشمند</h1>
+      <p>ایجنت یا خودت می‌توانید مستقیم به درس اضافه کنید. بچه همان را در درس می‌بیند.</p>
+    </div>
+  </header>
+  <main class="wrap agent-page">
+    <nav class="nav-cats" aria-label="منو">
+      <a href="vorod.html">ورود</a>
+      <a href="valed.html">والدین</a>
+      <a href="dastyar.html" aria-current="page">دستیار</a>
+      <a href="database.html">دیتابیس JSON</a>
+      <a href="index.html">درس‌ها</a>
+    </nav>
+    <p class="kid-note">اگر خطای CORS دیدی: <b dir="ltr">start-home.bat</b> را اجرا کن، با حساب والد وارد شو، بعد دستیار را از همان آدرس سرور باز کن (نه دوبارکلیک روی فایل).</p>
+    <p id="originWarn" class="kid-note" hidden></p>
+
+    <details class="fold agent-box" open>
+      <summary>۰) اتصال ایجنت</summary>
+      <div class="agent-grid">
+        <label class="full">آدرس واقعی ایجنت (مثلاً LM Studio / OpenAI)
+          <input id="baseUrl" type="url" placeholder="http://192.168.1.112:20128/v1" dir="ltr">
+        </label>
+        <label>کلید API
+          <input id="apiKey" type="password" placeholder="lm-studio" dir="ltr" autocomplete="off">
+        </label>
+        <label class="full">نام مدل (باید با مدل لودشده یکی باشد)
+          <select id="modelSelect" dir="ltr"></select>
+          <input id="model" type="text" placeholder="یا دستی بنویس — مثلاً claude-sonnet-4-5" dir="ltr">
+        </label>
+        <label class="full"><input id="useProxy" type="checkbox" checked> از سرور محلی به‌عنوان پروکسی استفاده کن (پیشنهادی — رفع CORS)</label>
+      </div>
+      <div class="feel-row">
+        <button type="button" class="fun-btn" id="syncModel">همگام با مدل لودشده</button>
+        <button type="button" class="fun-btn" id="saveCfg">ذخیرهٔ اتصال</button>
+      </div>
+      <span id="cfgMsg" class="agent-msg"></span>
+    </details>
+
+    <section class="panel agent-box">
+      <h2>۱) درس را انتخاب کن</h2>
+      <div class="agent-grid">
+        <label>علم
+          <select id="subject"></select>
+        </label>
+        <label>درس
+          <select id="lesson"></select>
+        </label>
+      </div>
+      <pre id="preview" class="agent-preview">درس را انتخاب کن…</pre>
+      <p id="openLesson" class="agent-msg"></p>
+    </section>
+
+    <section class="panel agent-box">
+      <h2>۲) از ایجنت بخواه یا خودت بنویس</h2>
+      <div class="feel-row" id="presets"></div>
+      <label class="full agent-ask">درخواست / متن
+        <textarea id="ask" rows="3" placeholder="مثلاً: ۳ تمرین ساده‌تر با جواب بساز و به درس اضافه کن"></textarea>
+      </label>
+      <div class="feel-row">
+        <button type="button" class="fun-btn on" id="send">بفرست به ایجنت</button>
+        <button type="button" class="fun-btn" id="copy">کپی برای Cursor / چت</button>
+      </div>
+      <p id="status" class="agent-msg"></p>
+      <div id="answer" class="agent-answer" hidden></div>
+      <div class="feel-row" id="applyRow" hidden>
+        <button type="button" class="fun-btn on" id="applyPack">افزودن پاسخ ایجنت به درس</button>
+        <button type="button" class="fun-btn" id="applyNote">فقط به‌صورت یادداشت ذخیره کن</button>
+      </div>
+    </section>
+
+    <section class="panel agent-box">
+      <h2>۳) افزودن دستی بزرگ‌تر</h2>
+      <div class="agent-grid">
+        <label class="full">یادداشت برای بچه
+          <textarea id="manNote" rows="2" placeholder="یک نکتهٔ کوتاه…"></textarea>
+        </label>
+        <label>سؤال تمرین
+          <input id="manQ" type="text" placeholder="سؤال">
+        </label>
+        <label>پاسخ تمرین
+          <input id="manA" type="text" placeholder="پاسخ">
+        </label>
+        <label class="full">سؤال مثال
+          <input id="manExQ" type="text" placeholder="صورت مثال">
+        </label>
+        <label>نتیجهٔ مثال
+          <input id="manExR" type="text" placeholder="جواب نهایی">
+        </label>
+        <label>گام‌های مثال (با Enter)
+          <textarea id="manExS" rows="2" placeholder="گام ۱&#10;گام ۲"></textarea>
+        </label>
+      </div>
+      <div class="feel-row">
+        <button type="button" class="fun-btn on" id="saveManual">ذخیره در درس</button>
+        <button type="button" class="fun-btn" id="clearLesson">پاک کردن افزوده‌های این درس</button>
+      </div>
+    </section>
+
+    <section class="panel agent-box">
+      <h2>افزوده‌های ذخیره‌شدهٔ این درس</h2>
+      <div id="addsView" class="adds-list"></div>
+      <div class="feel-row">
+        <button type="button" class="fun-btn" id="exportAdds">دانلود فایل افزوده‌ها</button>
+        <label class="fun-btn" style="cursor:pointer">بارگذاری فایل
+          <input id="importAdds" type="file" accept="application/json,.json" hidden>
+        </label>
+      </div>
+    </section>
+
+    <p class="footer">بعد از ذخیره، درس را در پوشهٔ همان علم دوباره باز کنید تا بچه محتوا را ببیند.</p>
+  </main>
+
+  <script src="assets/shared-adds.js"></script>
+  <script src="assets/adds.js"></script>
+  <script src="assets/agent.js"></script>
+  <script>
+    (function () {
+      const A = window.AGENT;
+      const D = window.ADDS;
+      const subjectEl = document.getElementById("subject");
+      const lessonEl = document.getElementById("lesson");
+      const preview = document.getElementById("preview");
+      const askEl = document.getElementById("ask");
+      const status = document.getElementById("status");
+      const answer = document.getElementById("answer");
+      const applyRow = document.getElementById("applyRow");
+      const addsView = document.getElementById("addsView");
+      let guide = null;
+      let lesson = null;
+      let lastAnswer = "";
+
+      function subKey() { return subjectEl.value; }
+      function lessonId() { return Number(lessonEl.value); }
+
+      function fillModels(ids, selected) {
+        const sel = document.getElementById("modelSelect");
+        sel.innerHTML = "";
+        const blank = document.createElement("option");
+        blank.value = "";
+        blank.textContent = ids && ids.length ? "— انتخاب از لیست —" : "ابتدا همگام‌سازی کن";
+        sel.appendChild(blank);
+        (ids || []).forEach(function (id) {
+          const o = document.createElement("option");
+          o.value = id;
+          o.textContent = id;
+          sel.appendChild(o);
+        });
+        if (selected) {
+          sel.value = selected;
+          document.getElementById("model").value = selected;
+        }
+      }
+
+      function readCfgFromForm() {
+        return {
+          baseUrl: document.getElementById("baseUrl").value.trim(),
+          model: document.getElementById("model").value.trim(),
+          apiKey: document.getElementById("apiKey").value.trim(),
+          useProxy: document.getElementById("useProxy").checked
+        };
+      }
+
+      function fillCfg() {
+        const c = A.loadCfg();
+        // مدل قدیمی پیش‌فرض که روی این ایجنت نیست
+        if (c.model === "gpt-4o-mini") c.model = "";
+        document.getElementById("baseUrl").value = c.baseUrl;
+        document.getElementById("model").value = c.model || "";
+        document.getElementById("apiKey").value = c.apiKey;
+        document.getElementById("useProxy").checked = c.useProxy !== false;
+        fillModels(c.model ? [c.model] : [], c.model || "");
+        const warn = document.getElementById("originWarn");
+        if (A.isFileOrigin()) {
+          warn.hidden = false;
+          warn.innerHTML = "این تب اشتباه است (file://).<br>اول <b dir=\"ltr\">start-home.bat</b> را اجرا کن و از صفحهٔ ورود همان سرور بیا اینجا.";
+        } else if (A.hasLocalServer()) {
+          warn.hidden = false;
+          warn.textContent = "سرور محلی فعال است — بدون CORS از پروکسی رد می‌شود. همگام‌سازی مدل را بزن.";
+        }
+      }
+
+      async function syncModelNow() {
+        const cfg = readCfgFromForm();
+        A.saveCfg(cfg);
+        document.getElementById("cfgMsg").textContent = "در حال خواندن مدل‌های لودشده…";
+        const synced = await A.syncLoadedModel(cfg);
+        document.getElementById("model").value = synced.model;
+        fillModels(synced.models, synced.model);
+        document.getElementById("cfgMsg").textContent = synced.model
+          ? "مدل تنظیم شد: " + synced.model
+          : "مدلی از ایجنت نیامد.";
+        return synced;
+      }
+
+      function params() {
+        const q = new URLSearchParams(location.search);
+        return { sub: q.get("sub"), id: q.get("id") ? Number(q.get("id")) : null };
+      }
+
+      function refreshAdds() {
+        if (!lesson) { addsView.innerHTML = "<p class=\"agent-msg\">درسی نیست.</p>"; return; }
+        const a = D.get(subKey(), lesson.id);
+        const bits = [];
+        (a.notes || []).forEach(function (n, i) {
+          bits.push("<div class=\"adds-item\"><small>یادداشت " + (i + 1) + "</small><div>" + n.replace(/</g, "&lt;") + "</div></div>");
+        });
+        (a.practice || []).forEach(function (p, i) {
+          bits.push("<div class=\"adds-item\"><small>تمرین " + (i + 1) + "</small><div>" + p.question.replace(/</g, "&lt;") + "</div></div>");
+        });
+        (a.examples || []).forEach(function (ex, i) {
+          bits.push("<div class=\"adds-item\"><small>مثال " + (i + 1) + "</small><div>" + ex.question.replace(/</g, "&lt;") + "</div></div>");
+        });
+        if (a.memory) bits.push("<div class=\"adds-item\"><small>جمله ماندگار</small><div>" + a.memory.replace(/</g, "&lt;") + "</div></div>");
+        if (a.scene) bits.push("<div class=\"adds-item\"><small>صحنه</small><div>" + a.scene.replace(/</g, "&lt;") + "</div></div>");
+        addsView.innerHTML = bits.length ? bits.join("") : "<p class=\"agent-msg\">هنوز افزوده‌ای نیست.</p>";
+        const sub = A.SUBJECTS.find(function (s) { return s.key === subKey(); });
+        document.getElementById("openLesson").innerHTML = sub
+          ? "<a href=\"" + sub.folder + "/index.html\">باز کردن درس برای بچه</a>"
+          : "";
+      }
+
+      A.SUBJECTS.forEach(function (s) {
+        const o = document.createElement("option");
+        o.value = s.key;
+        o.textContent = s.title;
+        o.dataset.folder = s.folder;
+        subjectEl.appendChild(o);
+      });
+
+      A.PRESETS.forEach(function (p) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "feel";
+        b.textContent = p.label;
+        b.addEventListener("click", function () { askEl.value = p.prompt; });
+        document.getElementById("presets").appendChild(b);
+      });
+
+      async function reloadLessons() {
+        const opt = subjectEl.selectedOptions[0];
+        status.textContent = "خواندن درس‌ها…";
+        try {
+          guide = await A.loadGuide(opt.dataset.folder);
+          lessonEl.innerHTML = "";
+          (guide.lessons || []).forEach(function (L) {
+            const o = document.createElement("option");
+            o.value = L.id;
+            o.textContent = L.id + ". " + L.title;
+            lessonEl.appendChild(o);
+          });
+          const want = params().id;
+          if (want) lessonEl.value = String(want);
+          pickLesson();
+          status.textContent = "";
+        } catch (e) {
+          status.textContent = e.message || String(e);
+        }
+      }
+
+      function pickLesson() {
+        const id = Number(lessonEl.value);
+        lesson = (guide.lessons || []).find(function (L) { return L.id === id; }) || null;
+        preview.textContent = A.lessonContext(guide || {}, lesson);
+        refreshAdds();
+      }
+
+      function buildUserMessage() {
+        const q = (askEl.value || "").trim() || A.PRESETS[0].prompt;
+        return "زمینهٔ درس:\n" + A.lessonContext(guide || {}, lesson) + "\n\nدرخواست والد/معلم:\n" + q +
+          "\n\nاگر محتوا برای ذخیره در درس است، حتماً JSON قالب سیستم را بگذار.";
+      }
+
+      document.getElementById("modelSelect").addEventListener("change", function () {
+        if (this.value) document.getElementById("model").value = this.value;
+      });
+
+      document.getElementById("syncModel").addEventListener("click", function () {
+        syncModelNow().catch(function (e) {
+          document.getElementById("cfgMsg").textContent = e.message || String(e);
+        });
+      });
+
+      document.getElementById("saveCfg").addEventListener("click", async function () {
+        const cfg = readCfgFromForm();
+        A.saveCfg(cfg);
+        await A.syncProxyConfig(cfg);
+        try {
+          const synced = await A.syncLoadedModel(cfg);
+          document.getElementById("model").value = synced.model;
+          fillModels(synced.models, synced.model);
+          document.getElementById("cfgMsg").textContent = "ذخیره شد. مدل لودشده: " + (synced.model || "—");
+        } catch (e) {
+          document.getElementById("cfgMsg").textContent = A.isFileOrigin()
+            ? "ذخیره شد، ولی هنوز باید start-home.bat را باز کنی."
+            : "ذخیره شد. همگام مدل: " + (e.message || e);
+        }
+      });
+
+      subjectEl.addEventListener("change", reloadLessons);
+      lessonEl.addEventListener("change", pickLesson);
+
+      document.getElementById("copy").addEventListener("click", function () {
+        A.copyPrompt(A.systemPrompt() + "\n\n" + buildUserMessage()).then(function () {
+          status.textContent = "کپی شد. بعد از جواب ایجنت، همان متن را اینجا بچسبان و «افزودن» را بزن.";
+        });
+      });
+
+      document.getElementById("send").addEventListener("click", async function () {
+        answer.hidden = true;
+        applyRow.hidden = true;
+        status.textContent = "در حال پرسیدن…";
+        try {
+          lastAnswer = await A.chat([
+            { role: "system", content: A.systemPrompt() },
+            { role: "user", content: buildUserMessage() }
+          ]);
+          answer.hidden = false;
+          answer.textContent = lastAnswer;
+          applyRow.hidden = false;
+          status.textContent = "آماده — می‌توانی به درس اضافه کنی.";
+        } catch (e) {
+          status.textContent = e.message || String(e);
+        }
+      });
+
+      document.getElementById("applyPack").addEventListener("click", function () {
+        if (!lesson) return;
+        const text = lastAnswer || answer.textContent || askEl.value;
+        const pack = D.parseAgentPack(text);
+        if (pack) {
+          D.applyPack(subKey(), lesson.id, pack, "ایجنت");
+          status.textContent = "به درس اضافه شد (مثال/تمرین/یادداشت).";
+        } else {
+          D.appendNote(subKey(), lesson.id, text, "ایجنت");
+          status.textContent = "JSON پیدا نشد؛ کل پاسخ به‌صورت یادداشت ذخیره شد.";
+        }
+        refreshAdds();
+      });
+
+      document.getElementById("applyNote").addEventListener("click", function () {
+        if (!lesson) return;
+        const text = lastAnswer || answer.textContent || askEl.value;
+        D.appendNote(subKey(), lesson.id, text, "ایجنت");
+        status.textContent = "یادداشت ذخیره شد.";
+        refreshAdds();
+      });
+
+      document.getElementById("saveManual").addEventListener("click", function () {
+        if (!lesson) return;
+        const note = document.getElementById("manNote").value.trim();
+        const q = document.getElementById("manQ").value.trim();
+        const a = document.getElementById("manA").value.trim();
+        const exq = document.getElementById("manExQ").value.trim();
+        const exr = document.getElementById("manExR").value.trim();
+        const exs = document.getElementById("manExS").value.trim().split(/\n+/).filter(Boolean);
+        const payload = {};
+        if (note) payload.notes = ["[بزرگ‌تر] " + note];
+        if (q) payload.practice = [{ question: q, answer: a || "…" }];
+        if (exq) payload.examples = [{ question: exq, solution: exs.length ? exs : ["با ایدهٔ درس حل کن."], result: exr || "" }];
+        if (!payload.notes && !payload.practice && !payload.examples) {
+          status.textContent = "چیزی برای ذخیره ننوشتی.";
+          return;
+        }
+        D.set(subKey(), lesson.id, payload);
+        document.getElementById("manNote").value = "";
+        document.getElementById("manQ").value = "";
+        document.getElementById("manA").value = "";
+        document.getElementById("manExQ").value = "";
+        document.getElementById("manExR").value = "";
+        document.getElementById("manExS").value = "";
+        status.textContent = "به درس اضافه شد.";
+        refreshAdds();
+      });
+
+      document.getElementById("clearLesson").addEventListener("click", function () {
+        if (!lesson) return;
+        if (!confirm("افزوده‌های این درس پاک شود؟")) return;
+        D.clearLesson(subKey(), lesson.id);
+        refreshAdds();
+        status.textContent = "پاک شد.";
+      });
+
+      document.getElementById("exportAdds").addEventListener("click", function () { D.download(); });
+      document.getElementById("importAdds").addEventListener("change", function (e) {
+        const f = e.target.files && e.target.files[0];
+        if (!f) return;
+        const reader = new FileReader();
+        reader.onload = function () {
+          try {
+            D.importJSON(String(reader.result || ""));
+            status.textContent = "فایل بارگذاری شد.";
+            refreshAdds();
+          } catch (err) {
+            status.textContent = err.message || String(err);
+          }
+        };
+        reader.readAsText(f, "utf-8");
+      });
+
+      // اگر از Cursor متن آوردند داخل ask بچسبانند و Apply بزنند
+      askEl.addEventListener("paste", function () {
+        setTimeout(function () {
+          if (D.parseAgentPack(askEl.value)) {
+            lastAnswer = askEl.value;
+            answer.hidden = false;
+            answer.textContent = askEl.value;
+            applyRow.hidden = false;
+            status.textContent = "JSON در متن پیدا شد — می‌توانی به درس اضافه کنی.";
+          }
+        }, 0);
+      });
+
+      fillCfg();
+      if (!A.isFileOrigin()) {
+        syncModelNow().catch(function () {});
+      }
+      const p = params();
+      if (p.sub) {
+        const hit = A.SUBJECTS.find(function (s) { return s.key === p.sub; });
+        if (hit) subjectEl.value = hit.key;
+      }
+      Promise.resolve(D.refreshFromServer && D.refreshFromServer()).finally(function () {
+        reloadLessons();
+      });
+    })();
+  </script>
+</body>
+</html>

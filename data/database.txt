@@ -1,0 +1,21 @@
+Two data layers
+===============
+
+1) data/app.sqlite  (SQLite)
+   parent, child, username, password, session, app settings
+   Managed from vorod.html and khanevadeh.html
+
+2) data/shared-adds.json  (JSON — lesson content)
+   Base lessons live in each subject's guide.js
+   Parent/agent additions go into this JSON
+
+Also
+----
+assets/shared-adds.js  — browser-fast copy of shared-adds.json
+agent-proxy.json       — agent URL + API key
+
+Grow content via
+----------------
+- dastyar.html
+- database.html
+- download / edit / upload JSON

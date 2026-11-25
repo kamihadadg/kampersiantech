@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102a43">
+  <title>دیتابیس JSON | همراه علوم</title>
+  <link rel="stylesheet" href="assets/guide.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <a class="back" href="valed.html">برای بزرگ‌ترها</a>
+      <a class="back" href="index.html">درس‌ها</a>
+      <h1>دیتابیس JSON</h1>
+      <p>همه‌چیز اضافه‌شده اینجاست. والد این فایل را بزرگ می‌کند؛ بچه همان را می‌خواند.</p>
+    </div>
+  </header>
+  <main class="wrap agent-page">
+    <nav class="nav-cats" aria-label="منو">
+      <a href="valed.html">والدین</a>
+      <a href="dastyar.html">دستیار</a>
+      <a href="database.html" aria-current="page">دیتابیس JSON</a>
+      <a href="index.html">درس‌ها</a>
+    </nav>
+    <p class="kid-note">فایل اصلی: <b dir="ltr">data/shared-adds.json</b> — با دستیار، یا ویرایش همین جعبه، یا بارگذاری فایل بزرگش کن.</p>
+
+    <section class="panel agent-box">
+      <h2>محتوای فعلی</h2>
+      <p class="agent-msg" id="meta">در حال خواندن…</p>
+      <textarea id="raw" class="db-editor" dir="ltr" spellcheck="false" rows="22" placeholder="{}"></textarea>
+      <div class="feel-row" style="margin-top:12px">
+        <button type="button" class="fun-btn on" id="save">ذخیره در سرور خانه</button>
+        <button type="button" class="fun-btn" id="reload">تازه‌سازی</button>
+        <button type="button" class="fun-btn" id="pretty">مرتب‌سازی JSON</button>
+        <button type="button" class="fun-btn" id="download">دانلود</button>
+        <label class="fun-btn" style="cursor:pointer">بارگذاری فایل
+          <input id="upload" type="file" accept="application/json,.json" hidden>
+        </label>
+      </div>
+      <p id="msg" class="agent-msg"></p>
+    </section>
+
+    <section class="panel agent-box">
+      <h2>خلاصه به زبان آدم</h2>
+      <div id="summary" class="adds-list"></div>
+    </section>
+
+    <p class="footer">ستاره‌های بچه جدا روی گوشی‌اش می‌ماند. این JSON فقط محتوای آموزشی اضافه‌شده است.</p>
+  </main>
+  <script src="assets/shared-adds.js"></script>
+  <script src="assets/adds.js"></script>
+  <script>
+    (function () {
+      const raw = document.getElementById("raw");
+      const msg = document.getElementById("msg");
+      const meta = document.getElementById("meta");
+      const summary = document.getElementById("summary");
+
+      function countPack(data) {
+        let lessons = 0, notes = 0, practice = 0, examples = 0;
+        Object.keys(data || {}).forEach(function (sub) {
+          Object.keys(data[sub] || {}).forEach(function (id) {
+            const L = data[sub][id] || {};
+            lessons += 1;
+            notes += (L.notes || []).length;
+            practice += (L.practice || []).length;
+            examples += (L.examples || []).length;
+          });
+        });
+        return { lessons: lessons, notes: notes, practice: practice, examples: examples };
+      }
+
+      function renderSummary(data) {
+        const bits = [];
+        Object.keys(data || {}).forEach(function (sub) {
+          Object.keys(data[sub] || {}).forEach(function (id) {
+            const L = data[sub][id] || {};
+            bits.push(
+              "<div class=\"adds-item\"><b>" + sub + " / درس " + id + "</b><br>" +
+              "یادداشت " + (L.notes || []).length +
+              " · مثال " + (L.examples || []).length +
+              " · تمرین " + (L.practice || []).length +
+              (L.updatedAt ? "<br><small>" + L.updatedAt + "</small>" : "") +
+              "</div>"
+            );
+          });
+        });
+        summary.innerHTML = bits.length ? bits.join("") : "<p class=\"agent-msg\">هنوز چیزی اضافه نشده. از دستیار شروع کن.</p>";
+      }
+
+      function show(data) {
+        raw.value = JSON.stringify(data || {}, null, 2);
+        const c = countPack(data);
+        meta.textContent = "درس‌های غنی‌شده: " + c.lessons + " · یادداشت: " + c.notes + " · مثال: " + c.examples + " · تمرین: " + c.practice;
+        renderSummary(data);
+      }
+
+      async function load() {
+        msg.textContent = "";
+        try {
+          if (location.protocol === "http:" || location.protocol === "https:") {
+            const res = await fetch("/api/adds", { cache: "no-store" });
+            const data = await res.json();
+            window.PACK_ADDS = data;
+            show(data);
+          } else {
+            show(window.PACK_ADDS || {});
+            msg.textContent = "برای ذخیره روی سرور خانه، از start-home.bat باز کن.";
+          }
+        } catch (e) {
+          show(window.PACK_ADDS || {});
+          msg.textContent = e.message || String(e);
+        }
+      }
+
+      document.getElementById("reload").addEventListener("click", load);
+      document.getElementById("pretty").addEventListener("click", function () {
+        try {
+          show(JSON.parse(raw.value || "{}"));
+          msg.textContent = "مرتب شد.";
+        } catch (e) {
+          msg.textContent = "JSON نامعتبر است: " + e.message;
+        }
+      });
+      document.getElementById("save").addEventListener("click", async function () {
+        try {
+          const data = JSON.parse(raw.value || "{}");
+          if (ADDS.onServer && ADDS.onServer()) {
+            const res = await fetch("/api/adds", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(data)
+            });
+            if (!res.ok) throw new Error("ذخیره روی سرور نشد");
+            window.PACK_ADDS = data;
+            show(data);
+            msg.textContent = "در دیتابیس سرور خانه ذخیره شد. بچه صفحه را یک‌بار تازه کند.";
+          } else {
+            ADDS.importJSON(JSON.stringify(data));
+            show(data);
+            msg.textContent = "محلی ذخیره شد. برای اشتراک با بچه، سرور خانه را روشن کن.";
+          }
+        } catch (e) {
+          msg.textContent = e.message || String(e);
+        }
+      });
+      document.getElementById("download").addEventListener("click", function () {
+        try {
+          const data = JSON.parse(raw.value || "{}");
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "shared-adds.json";
+          a.click();
+        } catch (e) {
+          msg.textContent = e.message || String(e);
+        }
+      });
+      document.getElementById("upload").addEventListener("change", function (e) {
+        const f = e.target.files && e.target.files[0];
+        if (!f) return;
+        const reader = new FileReader();
+        reader.onload = function () {
+          try {
+            show(JSON.parse(String(reader.result || "{}")));
+            msg.textContent = "بارگذاری شد — برای اعمال، ذخیره را بزن.";
+          } catch (err) {
+            msg.textContent = err.message || String(err);
+          }
+        };
+        reader.readAsText(f, "utf-8");
+      });
+
+      load();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+hamrah-ulum — Node pack
+=======================
+
+Need: Node.js 22.5+  (https://nodejs.org)
+No Python.
+
+For parent (no tech needed)
+---------------------------
+1) Double-click start-home.bat
+2) If Windows asks, click Yes
+3) Keep the black window open
+4) Login page opens → create parent account
+5) In khanevadeh make a user/pass for each child
+6) Kids: same Wi-Fi + login URL from the black window
+
+Default port 8080 (auto next if busy).
+
+Structure (Finglish folders/files)
+---------------------------------
+riazi/   fizik/   shimi/   zist/   zamin/   ← lesson content stays Persian
+vorod.html        login
+khanevadeh.html   family + settings
+khane.html        LAN addresses
+valed.html        parent guide
+dastyar.html      agent assistant
+database.html     JSON editor
+
+Data
+----
+data/app.sqlite         users + settings (SQLite)
+data/shared-adds.json   added lesson content (JSON)
+*/guide.js              base lessons (Persian text)
+
+npm
+---
+  npm start
+  npm run assistant
+
+Note: open HTML via the server, not double-click (CORS).
+Chem is not a home-lab recipe. Bio is not medical advice.

@@ -1,0 +1,46 @@
+{
+  "name": "hamrah-ulum",
+  "version": "1.0.0",
+  "description": "همراه علوم — سرور خانگی آموزش علوم با JSON، آزمایش لمسی و دستیار والد",
+  "license": "MIT",
+  "private": false,
+  "bin": {
+    "hamrah-ulum": "bin/hamrah-ulum.js"
+  },
+  "scripts": {
+    "start": "node bin/hamrah-ulum.js",
+    "home": "node bin/hamrah-ulum.js --host 0.0.0.0",
+    "assistant": "node bin/hamrah-ulum.js --host 127.0.0.1"
+  },
+  "engines": {
+    "node": ">=22.5"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "assets",
+    "data",
+    "riazi",
+    "fizik",
+    "shimi",
+    "zist",
+    "zamin",
+    "*.html",
+    "*.txt",
+    "*.json",
+    "README.md"
+  ],
+  "keywords": [
+    "education",
+    "persian",
+    "science",
+    "kids",
+    "offline",
+    "home-server",
+    "json"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kamtech/hamrah-ulum"
+  }
+}

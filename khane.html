@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102a43">
+  <title>سرور خانه | همراه علوم</title>
+  <link rel="stylesheet" href="assets/guide.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <a class="back" href="index.html">درس‌ها</a>
+      <h1>سرور خانه</h1>
+      <p>والد این صفحه را روی کامپیوتر روشن می‌کند؛ بچه‌ها با گوشی به همین وای‌فای وصل می‌شوند.</p>
+    </div>
+  </header>
+  <main class="wrap">
+    <nav class="nav-cats" aria-label="منو">
+      <a href="vorod.html">ورود</a>
+      <a href="khane.html" aria-current="page">سرور خانه</a>
+      <a href="khanevadeh.html">خانواده</a>
+      <a href="valed.html">والدین</a>
+    </nav>
+
+    <p class="kid-note" id="status">در حال خواندن آدرس شبکه…</p>
+    <section class="panel parent-card">
+      <h2>آدرس برای بچه‌ها</h2>
+      <div id="kids" class="adds-list"></div>
+    </section>
+    <section class="panel parent-card">
+      <h2>برای والد</h2>
+      <div id="adult" class="adds-list"></div>
+      <ol class="clean-list">
+        <li><b dir="ltr">start-home.bat</b> را باز کن؛ اگر ویندوز پرسید Yes بزن و پنجره را نبند.</li>
+        <li>از <a href="vorod.html">ورود</a> حساب بساز / وارد شو.</li>
+        <li>گوشی بچه: همان وای‌فای + آدرس ورود بالا.</li>
+      </ol>
+    </section>
+  </main>
+  <script>
+    fetch("/api/info").then(function (r) { return r.json(); }).then(function (info) {
+      document.getElementById("status").textContent = "سرور روشن است — پورت " + info.port;
+      document.getElementById("kids").innerHTML = (info.kids || []).map(function (u) {
+        var login = u.replace(/\/$/, "") + "/vorod.html";
+        return "<div class=\"adds-item\"><a href=\"" + login + "\" style=\"font-size:1.15rem;font-weight:800\" dir=\"ltr\">" + login + "</a><br><small>این را در گوشی بچه باز کن</small></div>";
+      }).join("") || "<p>آدرس شبکه پیدا نشد.</p>";
+      document.getElementById("adult").innerHTML =
+        "<div class=\"adds-item\"><a href=\"" + info.local + "\" dir=\"ltr\">" + info.local + "</a> روی همین سیستم</div>" +
+        (info.assistant || []).map(function (u) {
+          return "<div class=\"adds-item\"><a href=\"" + u + "\" dir=\"ltr\">" + u + "</a> دستیار</div>";
+        }).join("");
+    }).catch(function () {
+      document.getElementById("status").innerHTML = "سرور روشن نیست. فایل <b dir=\"ltr\">start-home.bat</b> را اجرا کن.";
+    });
+  </script>
+</body>
+</html>

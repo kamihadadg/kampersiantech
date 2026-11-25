@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102a43">
+  <title>برای بزرگ‌ترها | همراه علوم</title>
+  <link rel="stylesheet" href="assets/guide.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <a class="back" href="index.html">برگشت</a>
+      <h1>برای بزرگ‌ترها</h1>
+      <p>کوتاه و ساده: بچه با بازی و ستاره جلو می‌رود. شما فقط همراهی کنید.</p>
+    </div>
+  </header>
+  <main class="wrap">
+    <nav class="nav-cats" aria-label="منو">
+      <a href="vorod.html">ورود</a>
+      <a href="khane.html">سرور خانه</a>
+      <a href="khanevadeh.html">خانواده</a>
+      <a href="dastyar.html">دستیار</a>
+      <a href="database.html">دیتابیس JSON</a>
+    </nav>
+
+    <p class="kid-note">قانون طلایی: روزی یک درس کوتاه + یک آزمایش لمسی. فشار نگذارید. شیمی را فقط روی صفحه ببینید؛ مواد خانه را مخلوط نکنید. زیست درمان پزشکی نیست.</p>
+
+    <section class="panel parent-card">
+      <h2>۱) سرور خانه</h2>
+      <p>فقط <b dir="ltr">start-home.bat</b> را باز کن. اگر ویندوز پرسید Yes بزن. پنجره را نبند. اول حساب والد بساز، بعد برای هر بچه یوزر/رمز بگذار.</p>
+      <div class="feel-row">
+        <a class="fun-btn" href="khane.html" style="text-decoration:none">آدرس شبکه</a>
+        <a class="fun-btn" href="vorod.html" style="text-decoration:none">ورود</a>
+        <a class="fun-btn" href="khanevadeh.html" style="text-decoration:none">خانواده</a>
+      </div>
+    </section>
+
+    <section class="panel parent-card">
+      <h2>۲) دو جور داده</h2>
+      <ul class="clean-list">
+        <li><b dir="ltr">data/app.sqlite</b> — والد، فرزند، رمز، تنظیمات</li>
+        <li><b dir="ltr">data/shared-adds.json</b> — محتوای اضافه‌شده</li>
+      </ul>
+      <div class="feel-row">
+        <a class="fun-btn" href="database.html" style="text-decoration:none">دیتابیس JSON</a>
+        <a class="fun-btn" href="dastyar.html" style="text-decoration:none">دستیار ایجنت</a>
+      </div>
+    </section>
+
+    <section class="panel parent-card">
+      <h2>۳) برنامهٔ هفته به تفکیک علم</h2>
+      <div class="cat-grid" id="weeks"></div>
+    </section>
+
+    <p class="footer">ستاره‌ها روی همین دستگاه ذخیره می‌شوند.</p>
+  </main>
+  <script src="assets/fun.js"></script>
+  <script>
+    (function () {
+      const w = (window.FUN && window.FUN.weeks) || {};
+      const cats = [
+        { key: "math", title: "ریاضی", href: "riazi/index.html" },
+        { key: "phy", title: "فیزیک", href: "fizik/index.html" },
+        { key: "chem", title: "شیمی", href: "shimi/index.html" },
+        { key: "bio", title: "زیست‌شناسی", href: "zist/index.html" },
+        { key: "geo", title: "زمین‌شناسی", href: "zamin/index.html" }
+      ];
+      document.getElementById("weeks").innerHTML = cats.map(function (c) {
+        const items = (w[c.key] || []).map(function (t) { return "<li>" + t + "</li>"; }).join("");
+        return "<article class=\"cat-block\"><h3>" + c.title + "</h3><ol>" + items +
+          "</ol><p><a href=\"" + c.href + "\">باز کردن</a></p></article>";
+      }).join("");
+    })();
+  </script>
+</body>
+</html>

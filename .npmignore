@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+server.py
+_*.py
+.DS_Store
+*.zip
+agent-tools/
+.runtime/
+dist/
+data/app.sqlite
+data/app.sqlite-*
+agent-proxy.json
+

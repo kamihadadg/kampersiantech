@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102a43">
+  <title>همراه علوم</title>
+  <link rel="stylesheet" href="assets/guide.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <h1>همراه علوم</h1>
+      <p>یادگیری با بازی، ستاره، آزمایش لمسی و صدای کوتاه. آفلاین و بدون نصب.</p>
+      <span class="badge">ساده · ستاره‌دار · برای بچه‌ها</span>
+    </div>
+  </header>
+  <main class="wrap">
+    <p class="kid-note">از یک علم شروع کن. هر درس را بازی کن، ستاره بگیر، برو بعدی. اگر سخت بود «ساده‌تر نشان بده» را بزن.</p>
+    <p id="lanBanner" class="kid-note" hidden></p>
+
+    <nav class="nav-cats" aria-label="منو">
+      <a href="vorod.html">ورود</a>
+      <a href="khane.html">سرور خانه</a>
+      <a href="khanevadeh.html">خانواده</a>
+      <a href="valed.html">والدین</a>
+      <a href="dastyar.html">دستیار</a>
+      <a href="database.html">دیتابیس JSON</a>
+    </nav>
+
+    <h2 class="section-title">علوم</h2>
+    <section class="cards">
+      <a class="card" href="riazi/index.html">
+        <span class="swatch" style="background:#126b75">ر</span>
+        <h2>ریاضی</h2>
+        <p>از عدد، کسر و جبر تا هندسه، آمار، لگاریتم، حد، مشتق و انتگرال.</p>
+        <span class="meta">۲۳ درس · <span dir="ltr">riazi</span></span>
+      </a>
+      <a class="card" href="fizik/index.html">
+        <span class="swatch" style="background:#1d4e89">ف</span>
+        <h2>فیزیک</h2>
+        <p>از واحد و حرکت تا نیرو، انرژی، موج، مدار، گرما و فشار.</p>
+        <span class="meta">۱۶ درس · <span dir="ltr">fizik</span></span>
+      </a>
+      <a class="card" href="shimi/index.html">
+        <span class="swatch" style="background:#9a5b2f">ش</span>
+        <h2>شیمی</h2>
+        <p>از ماده و اتم تا پیوند، موازنه، pH، محلول، سرعت واکنش و ایمنی.</p>
+        <span class="meta">۱۶ درس · <span dir="ltr">shimi</span></span>
+      </a>
+      <a class="card" href="zist/index.html">
+        <span class="swatch" style="background:#2f7d4a">ز</span>
+        <h2>زیست‌شناسی</h2>
+        <p>از سلول و انرژی تا ژنتیک، بدن، بوم‌شناسی، انتخاب طبیعی و سلامت.</p>
+        <span class="meta">۱۶ درس · <span dir="ltr">zist</span></span>
+      </a>
+      <a class="card" href="zamin/index.html">
+        <span class="swatch" style="background:#6d5344">زم</span>
+        <h2>زمین‌شناسی</h2>
+        <p>از لایه‌ها و سنگ‌ها تا صفحه‌ها، زلزله، آب، خاک و منابع.</p>
+        <span class="meta">۱۴ درس · <span dir="ltr">zamin</span></span>
+      </a>
+    </section>
+    <p class="footer">همراه علوم — هر پوشه یک درس‌نامهٔ جداست</p>
+  </main>
+  <script>
+    fetch("/api/info").then(function (r) { return r.json(); }).then(function (info) {
+      var el = document.getElementById("lanBanner");
+      if (!el || !info.kids || !info.kids.length) return;
+      el.hidden = false;
+      el.innerHTML = "روی شبکه خانه هستید. آدرس برای دستگاه‌های دیگر: <b dir=\"ltr\">" + info.kids[0] + "</b>";
+    }).catch(function () {});
+  </script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102a43">
+  <title>ورود | همراه علوم</title>
+  <link rel="stylesheet" href="assets/guide.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <a class="back" href="index.html">درس‌ها</a>
+      <h1>ورود خانواده</h1>
+      <p>حساب‌ها در SQLite هستند؛ درس‌ها همان JSON فارسی می‌مانند.</p>
+    </div>
+  </header>
+  <main class="wrap">
+    <nav class="nav-cats" aria-label="منو">
+      <a href="vorod.html" aria-current="page">ورود</a>
+      <a href="khanevadeh.html">خانواده</a>
+      <a href="khane.html">سرور خانه</a>
+      <a href="valed.html">والدین</a>
+    </nav>
+
+    <p class="kid-note" id="msg">در حال بررسی…</p>
+
+    <section class="panel parent-card" id="setupBox" hidden>
+      <h2>۱) اولین بار — حساب والد</h2>
+      <form id="setupForm" class="form-stack" autocomplete="on">
+        <label>نام نمایشی
+          <input id="sName" name="display_name" type="text" value="والد" autocomplete="name">
+        </label>
+        <label>نام کاربری
+          <input id="sUser" name="username" type="text" value="valed" autocomplete="username" dir="ltr">
+        </label>
+        <label>رمز (حداقل ۴ کاراکتر)
+          <input id="sPass" name="password" type="password" autocomplete="new-password" dir="ltr">
+        </label>
+        <button type="submit" class="fun-btn">ساخت حساب والد</button>
+      </form>
+    </section>
+
+    <section class="panel parent-card" id="loginBox" hidden>
+      <h2>ورود</h2>
+      <form id="loginForm" class="form-stack" autocomplete="on">
+        <label>نام کاربری
+          <input id="lUser" name="username" type="text" autocomplete="username" dir="ltr">
+        </label>
+        <label>رمز
+          <input id="lPass" name="password" type="password" autocomplete="current-password" dir="ltr">
+        </label>
+        <button type="submit" class="fun-btn">ورود</button>
+      </form>
+    </section>
+
+    <section class="panel parent-card" id="meBox" hidden>
+      <h2 id="hello">سلام</h2>
+      <p id="meInfo"></p>
+      <div class="feel-row">
+        <a class="fun-btn" href="index.html" style="text-decoration:none">رفتن به درس‌ها</a>
+        <a class="fun-btn" id="familyLink" href="khanevadeh.html" style="text-decoration:none" hidden>خانواده و تنظیمات</a>
+        <button type="button" class="fun-btn" id="outBtn">خروج</button>
+      </div>
+    </section>
+  </main>
+  <script src="assets/auth.js"></script>
+  <script>
+    const msg = document.getElementById("msg");
+
+    function showError(e) {
+      const map = {
+        bad_credentials: "نام کاربری یا رمز اشتباه است",
+        login_required: "اول وارد شو",
+        parent_only: "فقط والد اجازه دارد"
+      };
+      msg.textContent = map[e && e.message] || (e && e.message) || "خطا";
+    }
+
+    function paint(st) {
+      const setup = document.getElementById("setupBox");
+      const login = document.getElementById("loginBox");
+      const meBox = document.getElementById("meBox");
+      setup.hidden = true;
+      login.hidden = true;
+      meBox.hidden = true;
+
+      if (st.me) {
+        meBox.hidden = false;
+        document.getElementById("hello").textContent = "سلام " + (st.me.display_name || st.me.username);
+        document.getElementById("meInfo").textContent =
+          "نقش: " + AUTH.roleLabel(st.me.role) + " · کاربر: " + st.me.username;
+        document.getElementById("familyLink").hidden = st.me.role !== "parent";
+        msg.textContent = "وارد شدی.";
+        return;
+      }
+      if (st.setupNeeded) {
+        setup.hidden = false;
+        msg.textContent = "هنوز حسابی نیست. اول حساب والد را بساز.";
+        return;
+      }
+      login.hidden = false;
+      msg.textContent = "با حساب خودت وارد شو.";
+    }
+
+    document.getElementById("setupForm").addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      AUTH.setup({
+        display_name: document.getElementById("sName").value,
+        username: document.getElementById("sUser").value,
+        password: document.getElementById("sPass").value
+      }).then(function () { return AUTH.status(); }).then(paint).catch(showError);
+    });
+
+    document.getElementById("loginForm").addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      AUTH.login(
+        document.getElementById("lUser").value,
+        document.getElementById("lPass").value
+      ).then(function () { return AUTH.status(); }).then(paint).catch(showError);
+    });
+
+    document.getElementById("outBtn").onclick = function () {
+      AUTH.logout().then(function () { return AUTH.status(); }).then(paint).catch(showError);
+    };
+
+    AUTH.status().then(paint).catch(function () {
+      msg.innerHTML = "سرور روشن نیست. فایل <b dir=\"ltr\">start-home.bat</b> را اجرا کن.";
+    });
+  </script>
+</body>
+</html>
