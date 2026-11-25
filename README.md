@@ -20,12 +20,24 @@
 npm start
 ```
 
+### اجرا با یک دستور (بدون کلون / ZIP)
+
+Node نصب باشد، بعد در ترمینال:
+
+```bash
+npx --yes github:kamihadadg/kampersiantech
+```
+
+یا لینک مستقیم ZIP پروژه:  
+https://github.com/kamihadadg/kampersiantech/archive/refs/heads/main.zip
+
 مرورگر روی صفحهٔ ورود باز می‌شود. پورت پیش‌فرض **۸۰۸۰** است.
 
 ## دستورها
 
 | دستور | کار |
 |---|---|
+| `npx --yes github:kamihadadg/kampersiantech` | دانلود و اجرا مستقیم از GitHub |
 | `npm start` | سرور خانه روی همه اینترفیس‌ها |
 | `npm run assistant` | فقط همین سیستم |
 | `hamrah-ulum --port 9000` | پورت پیشنهادی دلخواه |
