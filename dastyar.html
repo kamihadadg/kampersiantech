@@ -319,8 +319,11 @@
       });
 
       document.getElementById("send").addEventListener("click", async function () {
+        const sendBtn = document.getElementById("send");
+        if (sendBtn.disabled) return;
         answer.hidden = true;
         applyRow.hidden = true;
+        sendBtn.disabled = true;
         status.textContent = "در حال پرسیدن…";
         try {
           lastAnswer = await A.chat([
@@ -333,6 +336,8 @@
           status.textContent = "آماده — می‌توانی به درس اضافه کنی.";
         } catch (e) {
           status.textContent = e.message || String(e);
+        } finally {
+          sendBtn.disabled = false;
         }
       });
 

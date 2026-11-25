@@ -47,14 +47,29 @@
     return cfg.baseUrl.replace(/\/$/, "") + "/models";
   }
 
+  function authHeaders(cfg) {
+    const headers = { Accept: "application/json" };
+    const key = (cfg && cfg.apiKey || "").trim();
+    // با پروکسی محلی، اگر کلید خالی بود نفرست تا سرور از agent-proxy.json استفاده کند
+    if (key) headers.Authorization = "Bearer " + key;
+    else if (!(cfg && cfg.useProxy !== false && hasLocalServer())) headers.Authorization = "Bearer lm-studio";
+    return headers;
+  }
+
+  function fetchWithTimeout(url, options, ms) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(function () { ctrl.abort(); }, ms || 120000);
+    const opts = Object.assign({}, options || {}, { signal: ctrl.signal });
+    return fetch(url, opts).finally(function () { clearTimeout(timer); });
+  }
+
   async function listModels(cfg) {
     const c = cfg || loadCfg();
     if (isFileOrigin()) throw new Error(corsHelp());
     if (c.useProxy !== false && hasLocalServer()) await syncProxyConfig(c);
-    const key = (c.apiKey || "").trim() || "lm-studio";
-    const res = await fetch(modelsEndpoint(c), {
-      headers: { Authorization: "Bearer " + key }
-    });
+    const res = await fetchWithTimeout(modelsEndpoint(c), {
+      headers: authHeaders(c)
+    }, 15000);
     const data = await res.json().catch(function () { return {}; });
     if (!res.ok) {
       const msg = (data && data.error && (data.error.message || data.error)) || res.statusText || "models error";
@@ -234,13 +249,11 @@
       endpoint = cfg.baseUrl.replace(/\/$/, "") + "/chat/completions";
     }
 
-    const headers = { "Content-Type": "application/json" };
-    const key = (cfg.apiKey || "").trim() || "lm-studio";
-    headers.Authorization = "Bearer " + key;
+    const headers = Object.assign({ "Content-Type": "application/json" }, authHeaders(cfg));
 
     let res;
     try {
-      res = await fetch(endpoint, {
+      res = await fetchWithTimeout(endpoint, {
         method: "POST",
         headers: headers,
         body: JSON.stringify({
@@ -249,9 +262,12 @@
           temperature: 0.6,
           messages: messages
         })
-      });
+      }, 120000);
     } catch (e) {
       if (isFileOrigin()) throw new Error(corsHelp());
+      if (e && e.name === "AbortError") {
+        throw new Error("زمان پاسخ ایجنت تمام شد (۲ دقیقه). مدل را سبک‌تر کن یا دوباره بفرست.");
+      }
       throw new Error("ارتباط برقرار نشد: " + (e && e.message ? e.message : e) +
         " — مطمئن شو start-home.bat روشن است و ایجنت روی همان آدرس کار می‌کند.");
     }
@@ -262,10 +278,13 @@
       const msg = (data && data.error && (data.error.message || data.error)) || res.statusText || "خطای ایجنت";
       const text = String(msg);
       if (res.status === 401) {
-        throw new Error("ایجنت کلید می‌خواهد (401). در تنظیمات یک کلید بگذار؛ برای LM Studio معمولاً lm-studio کافی است.");
+        throw new Error("ایجنت کلید می‌خواهد (401). کلید را در agent-proxy.json یا تنظیمات دستیار بگذار.");
       }
       if (res.status === 404) {
         throw new Error("مسیر chat/completions پیدا نشد. آدرس باید شبیه http://IP:PORT/v1 باشد.");
+      }
+      if (res.status === 504) {
+        throw new Error(text || "Agent timeout");
       }
       if (/model|not found|does not exist|unknown/i.test(text)) {
         throw new Error(text + " — دکمهٔ «همگام با مدل لودشده» را بزن. مدل فعلی: " + cfg.model);
