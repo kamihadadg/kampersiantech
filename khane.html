@@ -41,10 +41,14 @@
   <script>
     fetch("/api/info").then(function (r) { return r.json(); }).then(function (info) {
       document.getElementById("status").textContent = "سرور روشن است — پورت " + info.port;
-      document.getElementById("kids").innerHTML = (info.kids || []).map(function (u) {
-        var login = u.replace(/\/$/, "") + "/vorod.html";
-        return "<div class=\"adds-item\"><a href=\"" + login + "\" style=\"font-size:1.15rem;font-weight:800\" dir=\"ltr\">" + login + "</a><br><small>این را در گوشی بچه باز کن</small></div>";
-      }).join("") || "<p>آدرس شبکه پیدا نشد.</p>";
+      var kids = info.kids || [];
+      document.getElementById("kids").innerHTML = kids.length
+        ? kids.map(function (u, i) {
+            var login = u.replace(/\/$/, "") + "/vorod.html";
+            var tip = i === 0 ? "همین را در گوشی بچه باز کن (همان وای‌فای خانه)" : "اگر بالا باز نشد، این را امتحان کن";
+            return "<div class=\"adds-item\"><a href=\"" + login + "\" style=\"font-size:1.15rem;font-weight:800\" dir=\"ltr\">" + login + "</a><br><small>" + tip + "</small></div>";
+          }).join("")
+        : "<p>آدرس شبکه پیدا نشد.</p>";
       document.getElementById("adult").innerHTML =
         "<div class=\"adds-item\"><a href=\"" + info.local + "\" dir=\"ltr\">" + info.local + "</a> روی همین سیستم</div>" +
         (info.assistant || []).map(function (u) {
