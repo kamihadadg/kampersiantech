@@ -170,7 +170,41 @@
       }).join("");
     }
     if (typeof choice.text === "string") return choice.text;
+    // برخی مدل‌های thinking فقط reasoning می‌فرستند
+    if (typeof msg.reasoning === "string" && msg.reasoning) return msg.reasoning;
+    if (typeof msg.reasoning_content === "string" && msg.reasoning_content) return msg.reasoning_content;
     return "";
+  }
+
+  function parseChatPayload(raw) {
+    const text = String(raw || "").trim();
+    if (!text) return {};
+    if (text.charAt(0) === "{") {
+      try { return JSON.parse(text); } catch (e) { return {}; }
+    }
+    // پاسخ SSE (stream) — تکه‌های data: را جمع کن
+    if (text.indexOf("data:") !== -1) {
+      let content = "";
+      let last = null;
+      text.split(/\r?\n/).forEach(function (line) {
+        const s = line.replace(/^data:\s*/, "").trim();
+        if (!s || s === "[DONE]") return;
+        try {
+          const chunk = JSON.parse(s);
+          last = chunk;
+          const piece = extractContent(chunk);
+          if (piece) content += piece;
+        } catch (e) {}
+      });
+      if (content) {
+        return {
+          choices: [{ message: { role: "assistant", content: content }, finish_reason: "stop" }],
+          model: last && last.model
+        };
+      }
+      return last || {};
+    }
+    return {};
   }
 
   async function chat(messages) {
@@ -211,6 +245,7 @@
         headers: headers,
         body: JSON.stringify({
           model: cfg.model,
+          stream: false,
           temperature: 0.6,
           messages: messages
         })
@@ -221,7 +256,8 @@
         " — مطمئن شو start-home.bat روشن است و ایجنت روی همان آدرس کار می‌کند.");
     }
 
-    const data = await res.json().catch(() => ({}));
+    const raw = await res.text();
+    const data = parseChatPayload(raw);
     if (!res.ok) {
       const msg = (data && data.error && (data.error.message || data.error)) || res.statusText || "خطای ایجنت";
       const text = String(msg);
@@ -238,7 +274,7 @@
     }
     const content = extractContent(data);
     if (!content) {
-      throw new Error("پاسخی از ایجنت نیامد. مدل فعلی «" + cfg.model + "» است؛ با «همگام با مدل لودشده» یکی‌اش کن.");
+      throw new Error("پاسخی از ایجنت نیامد. مدل فعلی «" + cfg.model + "» است؛ صفحه را یک‌بار رفرش کن یا «همگام با مدل لودشده» را بزن.");
     }
     return content;
   }
