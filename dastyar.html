@@ -24,8 +24,6 @@
       <a href="database.html">دیتابیس JSON</a>
       <a href="index.html">درس‌ها</a>
     </nav>
-    <p class="kid-note">اگر خطای CORS دیدی: <b dir="ltr">start-home.bat</b> را اجرا کن، با حساب والد وارد شو، بعد دستیار را از همان آدرس سرور باز کن (نه دوبارکلیک روی فایل).</p>
-    <p id="originWarn" class="kid-note" hidden></p>
 
     <details class="fold agent-box" open>
       <summary>۰) اتصال ایجنت</summary>
@@ -40,7 +38,7 @@
           <select id="modelSelect" dir="ltr"></select>
           <input id="model" type="text" placeholder="یا دستی بنویس — مثلاً claude-sonnet-4-5" dir="ltr">
         </label>
-        <label class="full"><input id="useProxy" type="checkbox" checked> از سرور محلی به‌عنوان پروکسی استفاده کن (پیشنهادی — رفع CORS)</label>
+        <label class="full"><input id="useProxy" type="checkbox" checked> از سرور محلی به‌عنوان پروکسی استفاده کن</label>
       </div>
       <div class="feel-row">
         <button type="button" class="fun-btn" id="syncModel">همگام با مدل لودشده</button>
@@ -182,14 +180,6 @@
         document.getElementById("apiKey").value = c.apiKey;
         document.getElementById("useProxy").checked = c.useProxy !== false;
         fillModels(c.model ? [c.model] : [], c.model || "");
-        const warn = document.getElementById("originWarn");
-        if (A.isFileOrigin()) {
-          warn.hidden = false;
-          warn.innerHTML = "این تب اشتباه است (file://).<br>اول <b dir=\"ltr\">start-home.bat</b> را اجرا کن و از صفحهٔ ورود همان سرور بیا اینجا.";
-        } else if (A.hasLocalServer()) {
-          warn.hidden = false;
-          warn.textContent = "سرور محلی فعال است — بدون CORS از پروکسی رد می‌شود. همگام‌سازی مدل را بزن.";
-        }
       }
 
       async function syncModelNow() {
@@ -303,9 +293,7 @@
           fillModels(synced.models, synced.model);
           document.getElementById("cfgMsg").textContent = "ذخیره شد. مدل لودشده: " + (synced.model || "—");
         } catch (e) {
-          document.getElementById("cfgMsg").textContent = A.isFileOrigin()
-            ? "ذخیره شد، ولی هنوز باید start-home.bat را باز کنی."
-            : "ذخیره شد. همگام مدل: " + (e.message || e);
+          document.getElementById("cfgMsg").textContent = "ذخیره شد. " + (e.message || e);
         }
       });
 

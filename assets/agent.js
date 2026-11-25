@@ -58,7 +58,7 @@
 
   function fetchWithTimeout(url, options, ms) {
     const ctrl = new AbortController();
-    const timer = setTimeout(function () { ctrl.abort(); }, ms || 120000);
+    const timer = setTimeout(function () { ctrl.abort(); }, ms || 300000);
     const opts = Object.assign({}, options || {}, { signal: ctrl.signal });
     return fetch(url, opts).finally(function () { clearTimeout(timer); });
   }
@@ -259,14 +259,15 @@
         body: JSON.stringify({
           model: cfg.model,
           stream: false,
-          temperature: 0.6,
+          temperature: 0.5,
+          max_tokens: 2048,
           messages: messages
         })
-      }, 120000);
+      }, 300000);
     } catch (e) {
       if (isFileOrigin()) throw new Error(corsHelp());
       if (e && e.name === "AbortError") {
-        throw new Error("زمان پاسخ ایجنت تمام شد (۲ دقیقه). مدل را سبک‌تر کن یا دوباره بفرست.");
+        throw new Error("زمان پاسخ ایجنت تمام شد. دوباره بفرست.");
       }
       throw new Error("ارتباط برقرار نشد: " + (e && e.message ? e.message : e) +
         " — مطمئن شو start-home.bat روشن است و ایجنت روی همان آدرس کار می‌کند.");
